@@ -1,19 +1,15 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect, useRef } from 'react'
 import { AuthContext } from '../services/AuthProvider'
 import {
-    sendMsg,
-    chatRef
+    sendChat,
+    receiveChats
 } from '../services/Chat'
-import {
-    onValue,
-    off
-} from 'firebase/database'
-import ChatBubble from '../components/ChatBubble'
+import ChatItem from '../components/ChatBubble'
 import {
     Card,
     Box,
     TextField,
-    Button
+    Button,
 } from '@mui/material'
 import { createUseStyles } from 'react-jss'
 import SendIcon from '@mui/icons-material/Send';
@@ -21,37 +17,56 @@ import SendIcon from '@mui/icons-material/Send';
 const useStyles = createUseStyles(theme => ({
     root: {
         display: 'flex',
-        height: '90vh',
+        height: '85vh',
         padding: "0 5%"
     },
 
     chat: {
         width: '100%',
-        height: '98%',
+        height: '100%',
         padding: '5%',
         display: 'flex',
         flexDirection: 'column'
     },
 
     chatArea: {
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
         flexGrow: 1,
         width: '100%',
-        backgroundColor: theme.palette.background.default,
+        WebkitOverflowScrolling: 'touch',
+
+        '&::-webkit-scrollbar': {
+            width: '6px'
+        },
+        '&::-webkit-scrollbar-track': {
+            background: theme.palette.background.default
+        },
+        '&::-webkit-scrollbar-thumb': {
+            background: theme.palette.grey[700]
+        }
     },
 
     form: {
         display: 'flex',
-        flexWrap: 'nowrap',
+        flexWrap: 'wrap',
         marginTop: "10px",
     },
 
-    msgBox: {
+    formFirstRow: {
+        display: 'flex',
+        width: '100%'
+    },
+
+    input: {
         flexGrow: 1,
         marginRight: '10px'
     },
 
-    send: {
-
+    upload: {
+        marginTop: '10px',
+        width: '100%',
     }
 }))
 
@@ -59,27 +74,31 @@ const Home = () => {
     const classes = useStyles()
 
     const { user } = useContext(AuthContext)
-
+    
+    const ref = useRef()
 
     //Handle sending a message
     const [msg, setMsg] = useState('')
+    const [file, setFile] = useState(null)
     const handleSubmit = (e) => {
         e.preventDefault()
-        sendMsg(msg, user)
+        sendChat(msg, file, user)
+        setMsg('')
+        setFile(null)
+        ref.current.value = null
     }
 
     //Handle receiving messages
-    const [chats, setChats] = useState({})
-
+    const [chats, setChats] = useState([])
     useEffect( () => {
-        onValue(chatRef, data => {
-            setChats(data.val())
-        })
+        receiveChats(data => {
+            setChats(data)
+        }, true)
 
         return function cleanup() {
-            off(chatRef)
+            receiveChats(null, false)
         }
-    })
+    }, [])
 
     if (!user) {
         return (
@@ -93,14 +112,14 @@ const Home = () => {
         <div className={classes.root}>
             <Card className={classes.chat}>
                 <Box className={classes.chatArea}>
-                    {
-                        Object.keys(chats).map( key => {
-                            const chat = chats[key]
+                    {   
+
+                        chats.map( (chat, index) => {
                             return (
-                                <ChatBubble
-                                    key={key}
-                                    name={chat.name}
-                                    message={chat.message}
+                                <ChatItem
+                                    key={index}
+                                    chat={chat}
+                                    isOwn={chat.uid === user.uid }
                                 />
                             )
                         })
@@ -110,20 +129,31 @@ const Home = () => {
                     className={classes.form}
                     onSubmit={handleSubmit}
                 >
+                    <div className={classes.formFirstRow}>
+                        <TextField
+                            className={classes.input}
+                            variant="outlined"
+                            label="Enter message"
+                            value={msg}
+                            onChange={e => setMsg(e.target.value)}
+                        ></TextField>
+                        <Button 
+                            variant="contained"
+                            type="submit"
+                        >
+                            <SendIcon />
+                        </Button>
+                    </div>
+
                     <TextField
-                        className={classes.msgBox}
+                        className={classes.upload}
                         variant="outlined"
-                        label="Enter message"
-                        value={msg}
-                        onChange={e => setMsg(e.target.value)}
-                    ></TextField>
-                    <Button 
-                        className={classes.send}
-                        variant="contained"
-                        type="submit"
+                        type="file"
+                        accept="image/png image/jpeg image/gif"
+                        onChange={e => setFile(e.target.files[0])}
+                        inputProps={{ ref: ref }}
                     >
-                        <SendIcon />
-                    </Button>
+                    </TextField>
                 </form>
             </Card>
         </div>

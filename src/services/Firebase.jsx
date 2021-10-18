@@ -74,6 +74,7 @@ const AuthProvider = ({children}) => {
                         setIsAdmin(true)
                     else
                         setIsAdmin(false)
+                    console.log(res)
                 })
             } else {
                 setUser(null)

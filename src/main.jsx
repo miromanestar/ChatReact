@@ -9,12 +9,20 @@ import {
     ThemeProvider as MUIThemeProvider,
     StyledEngineProvider,
     createTheme
-} from "@mui/material/styles";
-import { CssBaseline } from "@mui/material";
+} from "@mui/material/styles"
+import { CssBaseline } from "@mui/material"
 
 const theme = createTheme({
     palette: {
         mode: "dark",
+    },
+
+    components: {
+        MUICssBaseline: {
+            styleOverrides: {
+                
+            }
+        }
     }
 })
 
@@ -25,7 +33,7 @@ ReactDOM.render(
             <ThemeProvider theme={theme}>
                 <StyledEngineProvider injectFirst>
                     <AuthProvider>
-                        <App />
+                            <App />
                     </AuthProvider>
                 </StyledEngineProvider>
             </ThemeProvider>
