@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { AuthContext, authGoogle, logout } from './Firebase'
+import { AuthContext, authGoogle, logout } from '../services/AuthProvider'
 import { 
     AppBar, Toolbar,
     Avatar,

@@ -4,7 +4,9 @@ import {
     getDatabase,
     ref,
     child,
-    get
+    get,
+    push,
+    set
 } from 'firebase/database'
 import { 
     getAuth,
@@ -12,7 +14,7 @@ import {
     signInWithPopup, 
     GoogleAuthProvider 
 } from 'firebase/auth'
-import Loading from './Loading'
+import Loading from '../components/Loading'
 
 const firebaseConfig = {
     apiKey: "AIzaSyBzvpRofxpNd86yVN00qDVgMl8ZJtP6U4g",
@@ -25,10 +27,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth()
-const db = ref(getDatabase())
+const db = getDatabase()
 
+
+/* AUTHENTICATION HANDLING */
 const buildUser = async () => {
-    return get(child(db, `users/${auth.currentUser.uid}`)).then(snapshot => {
+    return get(child(ref(db), `users/${auth.currentUser.uid}`)).then(snapshot => {
         if (snapshot.exists()) {
             let temp = snapshot.val()
             temp.photo = auth.currentUser.photoURL
@@ -72,6 +76,7 @@ const AuthProvider = ({children}) => {
                         setIsAdmin(true)
                     else
                         setIsAdmin(false)
+                    console.log(res)
                 })
             } else {
                 setUser(null)
@@ -95,5 +100,5 @@ export {
     AuthContext,
     AuthProvider,
     authGoogle,
-    logout
+    logout,
 }
