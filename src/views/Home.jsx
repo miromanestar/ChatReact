@@ -67,6 +67,13 @@ const useStyles = createUseStyles(theme => ({
     upload: {
         marginTop: '10px',
         width: '100%',
+    },
+
+    unauthorized: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%'
     }
 }))
 
@@ -98,12 +105,13 @@ const Home = () => {
         return function cleanup() {
             receiveChats(null, false)
         }
-    }, [])
+    }, [user])
 
     if (!user) {
         return (
-            <div>
-                UNAUTHORIZED. PLEASE LOG IN
+            <div className={classes.unauthorized}>
+                Oopsie woopsie! It looks like you haven't logged in yet!
+                Maybe you should try it sometime!
             </div>
         )
     }
